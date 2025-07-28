@@ -1,0 +1,46 @@
+# Qt项目忽略文件
+*.pro.user
+*.pro.user.*
+*.qmake.stash
+*.qmake.cache
+build/
+build-*/
+bin/UnravelChat
+bin/
+debug/
+release/
+Debug/
+Release/
+
+# C++编译产物
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+
+# Qt特定文件
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+Makefile*
+
+# IDE和系统文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# 临时文件
+*.tmp
+*.temp
+*.log
+*.bak
+*.orig
