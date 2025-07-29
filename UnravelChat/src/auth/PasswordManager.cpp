@@ -97,7 +97,6 @@ PasswordAnalysis PasswordManager::analyzePassword(const QString& password) {
     analysis.meetsPolicy = analysis.issues.isEmpty();
     
     QString maskedPassword = QString("*").repeated(password.length());
-    emit passwordAnalyzed(maskedPassword, analysis);
     
     return analysis;
 }

@@ -1,3 +1,9 @@
+/**
+ * @file UserDatabase.h
+ * @author unravel
+ * @date 2025-07-28
+ */
+
 #ifndef USERDATABASE_H
 #define USERDATABASE_H
 
@@ -63,8 +69,14 @@ public:
     bool initialize();
     bool saveUser(const UserInfo& userInfo, const QString& hashedPassword, const QString& salt);
     UserInfo getUserInfo(const QString& username) const;
+    bool getUserPassword(const QString& username, QString& hashedPassword, QString& salt) const;
     bool userExists(const QString& username) const;
     bool emailExists(const QString& email) const;
+    bool updateLastLoginTime(const QString& username);
+    QStringList getAllUsernames() const;
+    int getUserCount() const;
+    bool deleteUser(const QString& username);
+    QString getUsernameByEmail(const QString& email) const;
     QString getDatabasePath() const { return databasePath_; }
 
 signals:

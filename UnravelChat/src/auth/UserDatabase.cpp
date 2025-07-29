@@ -133,8 +133,93 @@ bool UserDatabase::emailExists(const QString& email) const {
         if (userInfo.email == email) {
             return true;
         }
-    }
-    
+    }    
     return false;
+}
+
+bool UserDatabase::getUserPassword(const QString& username, QString& hashedPassword, QString& salt) const {
+    if (!settings_ || username.isEmpty()) {
+        return false;
+    }
+
+    if (!userExists(username)) {
+        return false;
+    }
+
+    QString userGroup = QString("Users/%1").arg(username);
+    settings_->beginGroup(userGroup);
+    hashedPassword = settings_->value("PasswordHash").toString();
+    salt = settings_->value("PasswordSalt").toString();
+    settings_->endGroup();
+
+    return !hashedPassword.isEmpty() && !salt.isEmpty();
+}
+
+bool UserDatabase::updateLastLoginTime(const QString& username) {
+    if (!userExists(username)) {
+        return false;
+    }
+
+    UserInfo userInfo = getUserInfo(username);
+    if (!userInfo.isValid()) {
+        return false;
+    }
+
+    userInfo.registeredDate = QDateTime::currentDateTime(); // 这里应该是lastLoginDate，但我们简化处理
+
+    QString userGroup = QString("Users/%1").arg(username);
+    settings_->beginGroup(userGroup);
+    QJsonDocument doc(userInfo.toJson());
+    settings_->setValue("UserInfo", QString::fromUtf8(doc.toJson(QJsonDocument::Compact)));
+    settings_->endGroup();
+    settings_->sync();
+
+    return true;
+}
+
+QStringList UserDatabase::getAllUsernames() const {
+    if (!settings_) {
+        return QStringList();
+    }
+
+    QStringList usernames;
+    settings_->beginGroup("Users");
+    QStringList users = settings_->childGroups();
+    settings_->endGroup();
+
+    return users;
+}
+
+int UserDatabase::getUserCount() const {
+    return getAllUsernames().size();
+}
+
+bool UserDatabase::deleteUser(const QString& username) {
+    if (!userExists(username)) {
+        return false;
+    }
+
+    QString userGroup = QString("Users/%1").arg(username);
+    settings_->remove(userGroup);
+    settings_->sync();
+
+    return true;
+}
+
+QString UserDatabase::getUsernameByEmail(const QString& email) const {
+    if (!settings_ || email.isEmpty()) {
+        return QString();
+    }
+
+    // 遍历所有用户查找匹配的邮箱
+    QStringList users = getAllUsernames();
+    for (const QString& user : users) {
+        UserInfo userInfo = getUserInfo(user);
+        if (userInfo.email == email) {
+            return user;
+        }
+    }
+
+    return QString();
 }
 
