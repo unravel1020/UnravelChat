@@ -1,0 +1,64 @@
+# .github/workflows/simple-tests.yml
+# 简化版GitHub Actions配置 - 适合初学者
+# 这个文件应该放在: .github/workflows/simple-tests.yml
+
+name: 🧪 UnravelChat Tests
+
+# 什么时候运行这个测试？
+on:
+  push:                    # 每次push代码时
+    branches: [ main, develop ]
+  pull_request:           # 每次创建PR时
+    branches: [ main ]
+
+# 任务定义
+jobs:
+  # 基础测试任务
+  basic-tests:
+    name: 🏗️ Build and Test
+    runs-on: ubuntu-latest  # 使用Ubuntu系统
+    
+    steps:
+    # 第1步：下载你的代码
+    - name: 📥 获取代码
+      uses: actions/checkout@v4
+    
+    # 第2步：安装Qt
+    - name: 🔧 安装Qt6
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: '6.6.0'
+        modules: 'qtbase qttools'
+    
+    # 第3步：安装系统依赖
+    - name: 📦 安装依赖
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake xvfb
+    
+    # 第4步：设置虚拟显示（用于GUI测试）
+    - name: 🖥️ 设置显示
+      run: |
+        Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+        echo "DISPLAY=:99" >> $GITHUB_ENV
+    
+    # 第5步：编译项目
+    - name: 🏗️ 编译项目
+      run: |
+        cd tests
+        qmake test_authenticationui_complete.pro
+        make
+    
+    # 第6步：运行测试
+    - name: 🧪 运行测试
+      run: |
+        cd tests
+        ./test_authenticationui_complete -silent
+    
+    # 第7步：上传测试结果（如果测试失败）
+    - name: 📤 上传测试结果
+      if: failure()  # 只在测试失败时执行
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-logs
+        path: tests/*.log
